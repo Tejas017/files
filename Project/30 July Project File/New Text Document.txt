@@ -1,0 +1,36 @@
+1. Enable Billing (Recommended for Production or HIPAA Use)
+To use Google Cloud Speech-to-Text:
+
+Go to: https://console.cloud.google.com/billing
+
+Add a credit/debit card or UPI.
+
+Link it to your project.
+
+Make sure Speech-to-Text is enabled in your project.
+
+🧠 Free Tier:
+
+60 minutes of speech-to-text per month (for US English)
+
+Free Google Cloud credit: ₹22,000 (~$300) if your account is new.
+
+2. Use Open-Source Alternative: Whisper (Offline)
+If you don’t want billing, you can use OpenAI Whisper, which is:
+
+✅ Free
+
+✅ Offline (no billing, no internet)
+
+✅ Highly accurate
+
+❌ Slightly heavy (~2GB model), slower on CPU
+
+
+ Is Whisper API HIPAA Compliant?
+No, the Whisper API is not HIPAA compliant by default 2.
+
+No BAA (Business Associate Agreement): OpenAI does not sign a BAA for Whisper, which is a requirement for HIPAA compliance.
+Implication: This means Whisper should not be used to process Protected Health Information (PHI) in regulated healthcare environments unless:
+You self-host the model in a secure, compliant infrastructure.
+You use a HIPAA-compliant wrapper or service that integrates Whisper and signs a BAA.

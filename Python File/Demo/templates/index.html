@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Voice Assistant</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding-top: 100px; }
+    button { font-size: 24px; padding: 20px; border-radius: 50%; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+    #output { margin-top: 30px; font-size: 20px; white-space: pre-line; }
+  </style>
+</head>
+<body>
+
+  <h1>🎤 Voice Assistant</h1>
+  <button onclick="startListening()">🎙️</button>
+  <div id="output">Click the mic and speak...</div>
+
+  <script>
+    function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+      document.getElementById('output').textContent = "Listening...";
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('output').textContent = "You said: " + transcript;
+
+        // Send to backend
+        fetch('/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: transcript })
+        })
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('output').textContent += "\nAssistant: " + data.response;
+        });
+      };
+
+      recognition.onerror = function(event) {
+        document.getElementById('output').textContent = "Error: " + event.error;
+      };
+    }
+  </script>
+
+</body>
+</html>

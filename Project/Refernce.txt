@@ -1,0 +1,56 @@
+
+The Voice-Activated Scheduling
+
+# Websites for reference 
+1. https://www.youtube.com/watch?v=av8E8qLZswU
+
+2. https://www.youtube.com/watch?v=u_xNvC9PpHA
+
+3.https://www.youtube.com/watch?v=F62wb_jfUUw
+
+
+
+import speech_recognition as sr
+import pyttsx3
+import datetime
+
+recognizer = sr.Recognizer()
+engine = pyttsx3.init()
+
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+def listen():
+    with sr.Microphone() as mic:
+        recognizer.adjust_for_ambient_noise(mic, duration=0.2)
+        print("Listening...")
+        audio = recognizer.listen(mic)
+        try:
+            text = recognizer.recognize_google(audio)
+            return text.lower()
+        except sr.UnknownValueError:
+            speak("Sorry, I didn't catch that.")
+            return None
+
+def save_note(note_text):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"note_{timestamp}.txt"
+    with open(filename, "w") as file:
+        file.write(note_text)
+    speak("Note saved successfully.")
+    print(f"Note saved to {filename}")
+
+# Main loop
+speak("Voice assistant ready. Say 'take a note' to begin.")
+while True:
+    command = listen()
+    if command:
+        if "take a note" in command or "note that" in command:
+            speak("What would you like me to note?")
+            note = listen()
+            if note:
+                save_note(note)
+        elif "exit" in command or "stop" in command:
+            speak("Goodbye!")
+            break

@@ -1,0 +1,62 @@
+import speech_recognition as sr
+import pyttsx3
+from plyer import notification
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime, timedelta
+import re
+
+# Initialize text-to-speech engine
+engine = pyttsx3.init()
+
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+# Function to show notification
+def show_reminder(task):
+    notification.notify(
+        title="Reminder",
+        message=task,
+        timeout=10
+    )
+    speak(f"Reminder: {task}")
+
+# Function to parse voice command
+def parse_command(command):
+    match = re.search(r"remind me to (.+?) in (\d+) (second|seconds|minute|minutes)", command, re.IGNORECASE)
+    if match:
+        task = match.group(1)
+        amount = int(match.group(2))
+        unit = match.group(3).lower()
+        delay = timedelta(seconds=amount) if "second" in unit else timedelta(minutes=amount)
+        return task, datetime.now() + delay
+    return None, None
+
+# Function to listen for voice input
+def listen_for_command():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        speak("I'm listening for your reminder.")
+        audio = recognizer.listen(source)
+        try:
+            command = recognizer.recognize_google(audio)
+            print("You said:", command)
+            return command
+        except sr.UnknownValueError:
+            speak("Sorry, I didn't catch that.")
+        except sr.RequestError:
+            speak("Sorry, there was a problem with the speech service.")
+    return None
+
+# Main logic
+scheduler = BackgroundScheduler()
+scheduler.start()
+
+command = listen_for_command()
+if command:
+    task, remind_time = parse_command(command)
+    if task and remind_time:
+        scheduler.add_job(show_reminder, 'date', run_date=remind_time, args=[task])
+        speak(f"Reminder set for {task} in a few moments.")
+    else:
+        speak("Sorry, I couldn't understand the reminder format.")
