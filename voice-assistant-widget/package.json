@@ -1,0 +1,35 @@
+{
+  "name": "voice-assistant-widget",
+  "version": "0.1.0",
+  "description": "Framework-agnostic voice assistant widget (field detection + command execution)",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist", "styles"],
+  "scripts": {
+    "dev": "tsup --watch --dts",
+    "build": "tsup",
+    "clean": "rimraf dist"
+  },
+  "keywords": [
+    "voice",
+    "assistant",
+    "widget",
+    "whisper",
+    "nlp",
+    "accessibility"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.0",
+    "rimraf": "^5.0.5"
+  }
+}

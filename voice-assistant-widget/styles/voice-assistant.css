@@ -1,0 +1,5 @@
+.voice-assistant-highlight {
+  outline: 2px solid #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.25) !important;
+  transition: box-shadow 0.2s ease-in-out;
+}
