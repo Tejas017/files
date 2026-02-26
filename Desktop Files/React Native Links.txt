@@ -1,0 +1,9 @@
+https://www.youtube.com/watch?v=JKccS9k56_I
+
+Stack Navigator  =>>>  https://reactnavigation.org/docs/stack-navigator/?config=dynamic
+
+Bottom Tabs Navigator	==>>> https://reactnavigation.org/docs/bottom-tab-navigator/
+
+react-native-vector-icons ==>> https://www.npmjs.com/package/react-native-vector-icons
+
+Drawer Navigator ==>> https://reactnavigation.org/docs/drawer-navigator/#nesting-drawer-navigators-inside-others 

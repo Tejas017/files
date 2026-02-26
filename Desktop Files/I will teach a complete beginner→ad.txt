@@ -1,0 +1,360 @@
+I will teach a complete beginner→advanced AI/ML course focused on Generative AI: syllabus, compact theory notes, runnable code sketches, and practice problems with solution hints.
+
+Quick start (environment)
+
+Install Python 3.9+ (use conda or venv).
+
+Create env:
+
+conda create -n ai python=3.10 -y
+conda activate ai
+
+
+Core packages:
+
+pip install -U pip jupyterlab numpy scipy pandas matplotlib scikit-learn
+pip install torch torchvision torchaudio     # pick CPU or CUDA per your machine
+pip install transformers datasets accelerate diffusers faiss-cpu huggingface_hub
+
+
+Use VSCode or Jupyter for iterative work. Keep GPU access for deep models.
+
+Course outline (12 weeks)
+
+Math foundations
+
+Python & ML tooling
+
+Supervised learning: regression & classification
+
+Optimization & regularization
+
+Neural nets & backprop
+
+CNNs and vision basics
+
+Sequence models, attention, transformers
+
+Generative models (deep dive) ← priority
+
+Large Language Models, fine-tuning, RAG
+
+Evaluation, metrics, model selection
+
+Deployment, inference optimization, MLOps
+
+Ethics, safety, capstone project
+
+1. Math foundations (key notes)
+
+Linear algebra: vectors, matrices, matrix multiply, transpose, inverse, eigenvalues/eigenvectors, SVD.
+
+Calculus: derivatives, gradients, partial derivatives, chain rule. Gradient = direction of steepest increase.
+
+Probability: random variables, pdf/pmf, expectation, variance, conditional probability, Bayes rule.
+
+Optimization basics: convex vs nonconvex, local minima, gradient descent.
+
+Practice:
+
+Derive gradient of MSE loss L = 1/N ∑(y - Xw)^2 wrt w. (Solution: -2/N X^T(y-Xw))
+
+Compute eigenvalues of [[2,1],[1,2]]. (Hint: solve det(A-λI)=0)
+
+2. Python & ML tooling
+
+Numpy for vectors.
+
+pandas for tabular.
+
+scikit-learn for baseline models.
+
+PyTorch basics: torch.Tensor, autograd, nn.Module, DataLoader.
+
+Hugging Face transformers and datasets for models/data.
+
+Quick PyTorch snippet:
+
+import torch, torch.nn as nn
+x = torch.randn(10,3)
+model = nn.Linear(3,1)
+y = model(x)
+loss = (y**2).mean()
+loss.backward()
+
+3. Supervised learning
+
+Regression: linear regression, least squares, closed-form w=(X^TX)^{-1}X^Ty.
+
+Classification: logistic regression, softmax, cross-entropy loss.
+
+Metrics: accuracy, precision, recall, F1, ROC-AUC.
+
+Bias-variance tradeoff. Cross-validation.
+
+Practice:
+
+Implement logistic regression gradient descent from scratch on a toy dataset.
+
+Compare k-fold CV vs hold-out on accuracy variance.
+
+4. Optimization & regularization
+
+Gradient descent, SGD, mini-batch. Momentum, Adam.
+
+Learning rate schedules.
+
+Regularization: L2, L1, dropout, early stopping.
+
+BatchNorm intuition: normalize layer inputs per batch.
+
+Practice:
+
+Train same MLP with and without dropout; compare test error.
+
+Implement Adam update step.
+
+5. Neural networks & backprop
+
+Perceptron, MLP, activation functions (ReLU, sigmoid, tanh, GELU).
+
+Backprop derivation via chain rule.
+
+Weight initialization (Xavier, He).
+
+Vanishing/exploding gradients causes and remedies.
+
+Practice:
+
+Derive backprop gradients for a 2-layer network with ReLU.
+
+Implement forward+backward for single hidden layer without autograd.
+
+6. CNNs and vision
+
+Convolution operation, stride, padding, receptive field.
+
+Pooling, normalization, residual connections (ResNet idea).
+
+Transfer learning with pretrained models.
+
+Practice:
+
+Build small CNN for MNIST in PyTorch.
+
+Fine-tune pretrained ResNet on small custom dataset.
+
+7. Sequence models → Transformers
+
+RNN, LSTM, GRU basics and limitations (long-range dependencies).
+
+Attention: scaled dot-product attention softmax(QK^T/√d) V.
+
+Transformer block: multi-head attention, position-wise feedforward, residual + layer norm, positional encodings.
+
+Encoder vs decoder architectures.
+
+Masking for autoregressive generation.
+
+Practice:
+
+Implement scaled dot-product attention (matrix form).
+
+Build tiny transformer decoder for char-level language modeling.
+
+8. Generative models (deep dive)
+
+Core categories:
+
+Autoregressive: model p(x)=∏ p(x_t|x_<t). Examples: n-gram, RNN LM, Transformer decoders (GPT). Trained with teacher forcing using cross-entropy. Good likelihoods. Slow sampling sequentially.
+
+Latent variable models (VAE):
+
+Generative model pθ(x|z) p(z). Evidence p(x)=∫ pθ(x|z)p(z) dz. Intractable.
+
+ELBO: log pθ(x) ≥ E_{qφ(z|x)}[log pθ(x|z)] - KL(qφ(z|x) || p(z)).
+
+Reparameterization: z = μ + σ ⊙ ε, ε ~ N(0,I) to backprop through sampling.
+
+Loss = reconstruction loss + KL. Produces smooth latent space.
+
+Generative Adversarial Networks (GANs):
+
+Minimax: min_G max_D V(D,G) = E_x[log D(x)] + E_z[log(1-D(G(z)))].
+
+Training alternates discriminator and generator updates.
+
+Issues: mode collapse, instability. Fixes: WGAN (earth mover distance), gradient penalty, spectral norm, label smoothing, two-time-scale updates.
+
+Normalizing Flows:
+
+Invertible transform x = f(z). Change of variables: p_X(x)=p_Z(z)|det ∂f^{-1}/∂x|.
+
+RealNVP, Glow are examples.
+
+Score-based / Diffusion models (DDPM / Score matching):
+
+Forward: add noise in T steps to transform data into Gaussian.
+
+Train a model to predict noise εθ(x_t,t). Objective simplifies to E[||ε - εθ(x_t,t)||^2].
+
+Sampling: iterative denoising from noise using learned model. High-quality image generation.
+
+Evaluation metrics:
+
+Images: FID (Fréchet Inception Distance), IS.
+
+Text: Perplexity, BLEU, ROUGE. For LLMs also human eval and factuality checks.
+
+Likelihood-based vs sample-quality trade-offs.
+
+Mathematical highlights (compact):
+
+VAE ELBO derivation sketch:
+
+log p(x) = ELBO + KL(q(z|x)||p(z|x))
+ELBO = E_q[log p(x|z)] - KL(q(z|x)||p(z))
+
+
+GAN objective and gradient updates alternate D and G.
+
+Practice (generative):
+
+VAE on MNIST: implement encoder→mu/logvar, reparameterize, decoder. Train and visualize latent interpolations.
+
+Hint: use BCE or MSE reconstruction and KL term -0.5 * sum(1 + logvar - mu^2 - exp(logvar)).
+
+DCGAN on CIFAR-10: implement generator and discriminator with conv transpose and conv layers. Train and track losses and samples.
+
+Tiny DDPM on MNIST: implement noise schedule β_t, forward q, train εθ to predict noise. Sample with 50 steps.
+
+Autoregressive Transformer: train small decoder-only model on a plain-text corpus for next-token prediction. Evaluate perplexity.
+
+Flow toy: implement simple RealNVP coupling layer and train to model 2D mixtures of Gaussians.
+
+Code sketch: VAE encoder/decoder (PyTorch)
+
+class Encoder(nn.Module):
+  def __init__(...): ...
+  def forward(self,x):
+    h = self.net(x)
+    mu, logvar = h.chunk(2, dim=1)
+    return mu, logvar
+
+def reparam(mu, logvar):
+  eps = torch.randn_like(mu)
+  return mu + eps * (0.5*logvar).exp()
+
+9. Large Language Models & practical GenAI
+
+Pretraining objectives: autoregressive LM (GPT) vs masked LM (BERT).
+
+Scaling laws: more data + params → better performance (rough rule).
+
+Fine-tuning: supervised fine-tuning, instruction tuning, RLHF (collect preferences, train reward model, PPO).
+
+Retrieval-Augmented Generation (RAG): combine retriever (FAISS, Elastic) + reader LM. Reduces hallucination.
+
+Prompt engineering: zero-shot, few-shot, chain-of-thought. Prompt templates and evaluation.
+
+Practice:
+
+Fine-tune a small HF model (distilgpt2) on custom Q/A pairs.
+
+Build a simple RAG: index passages with FAISS, retrieve top-K, prepend to prompt.
+
+10. Evaluation & metrics
+
+Use suites: held-out likelihood, precision/recall for generative models, FID for images, BLEU/ROUGE for translation/summarization.
+
+Human evaluation is often required for open-ended generation.
+
+Calibration and uncertainty: temperature scaling, proper scoring rules.
+
+Practice:
+
+Compute FID between two image sets (use precomputed Inception embeddings).
+
+Measure calibration of classifier using expected calibration error.
+
+11. Deployment & MLOps
+
+Model serialization: TorchScript, ONNX.
+
+Quantization (8-bit, 4-bit), pruning, distillation.
+
+Serving: FastAPI, Triton, Ray Serve, Hugging Face Inference.
+
+Monitoring: data drift, concept drift, latency, error rates.
+
+Practice:
+
+Convert a PyTorch model to ONNX and run simple inference.
+
+Implement basic monitoring that logs input length and latency.
+
+12. Ethics & safety
+
+Data consent and provenance.
+
+Bias and fairness.
+
+Hallucinations, misinformation, deepfakes.
+
+Watermarking and detection methods.
+
+Regulatory and privacy constraints.
+
+Practice:
+
+Audit a dataset for demographic imbalance and propose reweighting.
+
+Propose mitigation for a harmful output case by retrieval grounding.
+
+Projects (progressive)
+
+Beginner: Linear regression from scratch; MNIST classifier.
+
+Intermediate: VAE on fashion-MNIST with latent traversal visualization.
+
+Advanced: Train a GAN/DDPM on CIFAR-10 and evaluate FID.
+
+Capstone: Build a RAG-based Q/A app with a small LLM and FAISS-backed retrieval. Deploy with FastAPI.
+
+Practice sets (starter pack with answers/hints)
+
+A. Fundamentals
+
+Implement linear regression with gradient descent. (Hint: use MSE and compute analytic gradient.)
+
+Implement logistic regression and plot ROC curve.
+
+B. Neural nets
+
+Code a 2-layer NN and train on MNIST using plain SGD. Report test accuracy.
+
+Show effect of weight initialization by trying zero vs Xavier init.
+
+C. Generative
+
+Implement VAE on MNIST and show 10 latent interpolations between random points. (Solution hint: take two z, linearly interpolate, decode.)
+
+Train DCGAN on small dataset and save generator checkpoints. Visualize samples per epoch.
+
+Implement a tiny diffusion forward noise schedule β_t = linear(1e-4, 0.02) and train εθ.
+
+D. NLP
+
+Fine-tune distilbert for sentiment classification on SST-2. Evaluate accuracy.
+
+Fine-tune distilgpt2 for character-level next-token prediction on a small text.
+
+How we proceed now
+
+Tell me which module to expand first. I will then:
+
+Provide step-by-step theory with equations.
+
+Provide complete runnable notebook-level code (PyTorch).
+
+Provide 8–12 practice problems with solutions and test datasets.

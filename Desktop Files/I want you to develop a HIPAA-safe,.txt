@@ -1,0 +1,69 @@
+I want you to develop a HIPAA-safe, voice-controlled web assistant that can be embedded into any existing website and provide the following features:
+
+Universal Website Control via Voice Commands
+
+Navigate to any page on the website (using the website's available routes or menu items).
+
+Fill any input field, form, textarea, or appointment booking widget using voice commands.
+
+Submit, reset, or clear forms via voice.
+
+Support for multiple input types: text, dropdown, radio, checkbox, date pickers, etc.
+
+Dynamic Field Matching
+
+The assistant should identify and fill fields even when the <label> text and name/id attribute values are different.
+
+It should use fuzzy matching, DOM proximity detection, or NLP to understand which field the user is referring to.
+
+For example: If the label says "Full Name" but the input’s name is user_name, it should still match.
+
+HIPAA-Safe Implementation
+
+All speech-to-text (STT) and text-to-speech (TTS) processing must use HIPAA-compliant services or local processing (e.g., local Whisper or HIPAA BAA-covered cloud services).
+
+No PHI (Protected Health Information) should be stored or transmitted insecurely.
+
+The architecture should allow swapping between local and cloud APIs depending on BAA agreements.
+
+Wake Word & Listening Mode
+
+The assistant should have a configurable wake word (e.g., “Jarvis”) that activates listening.
+
+After the wake word, it stays in active command mode until told to “stop” or “sleep.”
+
+It should be toggleable via a button (e.g., in a navbar) that changes color when active.
+
+Pluggable Anywhere
+
+The assistant should be packaged so it can be easily injected into any website without breaking existing functionality.
+
+It should detect forms, inputs, and navigation menus automatically.
+
+Technical Requirements
+
+Frontend: JavaScript (Vanilla or React) for DOM control and capturing audio.
+
+Backend: Flask or Node.js to handle STT, NLP, and TTS (HIPAA-safe).
+
+NLP: Use spaCy, Rasa, or Transformers for intent detection (fill, navigate, submit, book appointment, etc.).
+
+STT/TTS: Use local Whisper or a HIPAA-compliant API.
+
+Implement fuzzy matching for field identification.
+
+Support cross-browser compatibility.
+
+Output
+
+Provide complete architecture (frontend, backend, NLP pipeline, and HIPAA considerations).
+
+Include setup instructions and example code for integration into an existing website.
+
+Show example voice commands and how they are processed end-to-end.
+
+Build the full solution with detailed explanations so it can be directly implemented.
+
+If you want, I can also optimize this prompt to force ChatGPT to return working code for both frontend and backend in one go so you can plug and test immediately. That way you can skip the trial-and-error stage.
+
+Do you want me to prepare that optimized “full code generation” version?

@@ -1,0 +1,13 @@
+spacy
+flask
+flask-cors
+speechrecognition
+faster-whisper
+
+
+
+Biz@Harris#25
+
+
+YelkarT07
+H@rris#9867

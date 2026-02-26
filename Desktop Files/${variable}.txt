@@ -1,0 +1,34 @@
+${variable} is a template placeholder syntax used in test automation and scripting. Here's what it means:
+
+Breakdown:
+
+${ } = "This is a placeholder, replace me with actual value"
+variable = the name of the variable/parameter to use
+Examples in testing context:
+${username}        → Will be replaced with actual username value
+${password}        → Will be replaced with actual password
+${email}           → Will be replaced with actual email
+${date}            → Will be replaced with actual date
+${productName}     → Will be replaced with actual product name
+
+How it works in your extension:
+
+When you type a value like ${username} into a text field:
+
+The system detects the ${...} pattern
+Recognizes it as a data-driven value (not hardcoded text)
+Auto-logs dynamicset action instead of regular set
+When the test runs later, it replaces ${username} with real data from Excel/database
+Real-world example:
+Action	Identifier	Value	Description
+dynamicset	id=loginField	${username}	Set username field with data variable
+click	id=submitBtn		Click login button
+When test runs:
+
+${username} → replaced with "john_doe" (from test data)
+Same test works with different usernames without changing script
+Why it's useful:
+
+Makes tests reusable with different data
+No hardcoding → easier to maintain
+One script works for multiple test cases

@@ -1,0 +1,473 @@
+// // import { useEffect, useRef } from "react";
+
+// // export function useRecognizer({ listening, onTranscript }) {
+// //   const wsRef = useRef(null);
+// //   const audioContextRef = useRef(null);
+// //   const workletNodeRef = useRef(null);
+// //   const sourceRef = useRef(null);
+
+// //   useEffect(() => {
+// //     if (!listening) {
+// //       if (workletNodeRef.current) workletNodeRef.current.disconnect();
+// //       if (sourceRef.current) sourceRef.current.disconnect();
+// //       if (audioContextRef.current) audioContextRef.current.close();
+// //       if (wsRef.current) wsRef.current.close();
+// //       return;
+// //     }
+
+// //     wsRef.current = new WebSocket("ws://localhost:8002");
+// //     wsRef.current.onmessage = (event) => {
+// //       const data = JSON.parse(event.data);
+// //       if (data.transcript) onTranscript(data.transcript);
+// //     };
+
+// //     const initAudio = async () => {
+// //       const audioContext = new AudioContext({ sampleRate: 16000 });
+// //       audioContextRef.current = audioContext;
+
+// //       // Load a simple worklet processor that passes audio data
+// //       await audioContext.audioWorklet.addModule("audio-processor.js");
+
+// //       const source = audioContext.createMediaStreamSource(
+// //         await navigator.mediaDevices.getUserMedia({ audio: true })
+// //       );
+// //       sourceRef.current = source;
+
+// //       const workletNode = new AudioWorkletNode(audioContext, "audio-processor");
+// //       workletNodeRef.current = workletNode;
+
+// //       workletNode.port.onmessage = (event) => {
+// //         const float32Array = event.data;
+// //         if (wsRef.current.readyState === WebSocket.OPEN) {
+// //           wsRef.current.send(
+// //             JSON.stringify({
+// //               type: "audio_chunk",
+// //               data: Array.from(float32Array),
+// //             })
+// //           );
+// //         }
+// //       };
+
+// //       source.connect(workletNode);
+// //       workletNode.connect(audioContext.destination); // still needed for AudioWorkletNode
+// //     };
+
+// //     initAudio();
+
+// //     return () => {
+// //       if (workletNodeRef.current) workletNodeRef.current.disconnect();
+// //       if (sourceRef.current) sourceRef.current.disconnect();
+// //       if (audioContextRef.current) audioContextRef.current.close();
+// //       if (wsRef.current) wsRef.current.close();
+// //     };
+// //   }, [listening, onTranscript]);
+// // }
+
+// 29/09/2025 = its transcribing
+// import { useEffect, useRef } from "react";
+
+// export function useRecognizer({ listening, onTranscript }) {
+//   const wsRef = useRef(null);
+//   const audioContextRef = useRef(null);
+//   const workletNodeRef = useRef(null);
+//   const sourceRef = useRef(null);
+
+//   useEffect(() => {
+//     if (!listening) {
+//       if (workletNodeRef.current) workletNodeRef.current.disconnect();
+//       if (sourceRef.current) sourceRef.current.disconnect();
+//       if (audioContextRef.current) audioContextRef.current.close();
+//       if (wsRef.current) wsRef.current.close();
+//       return;
+//     }
+
+//     // // 1. Ask backend for the free WS port
+//     // fetch("http://localhost:5000/ws-port")
+//     //   .then((res) => res.json())
+//     //   .then(async ({ port }) => {
+//     //     wsRef.current = new WebSocket(`ws://localhost:${port}`);
+//     //     wsRef.current.onopen = () =>
+//     //       console.log("🔗 WebSocket connected to port", port);
+//     //     wsRef.current.onerror = (err) =>
+//     //       console.error("❌ WebSocket error:", err);
+//     //     wsRef.current.onclose = () => console.log("❌ WebSocket closed");
+//     //     wsRef.current.onmessage = (event) => {
+//     //       const data = JSON.parse(event.data);
+//     //       if (data.transcript) onTranscript(data.transcript);
+//     //     };
+
+//     (async () => {
+//       wsRef.current = new WebSocket("ws://localhost:5000/ws");
+//       wsRef.current.onopen = () =>
+//         console.log("🔗 WebSocket connected to ws://localhost:5000/ws");
+//       wsRef.current.onerror = (err) =>
+//         console.error("❌ WebSocket error:", err);
+//       wsRef.current.onclose = () => console.log("❌ WebSocket closed");
+//       wsRef.current.onmessage = (event) => {
+//         const data = JSON.parse(event.data);
+//         if (data.transcript) onTranscript(data.transcript);
+//       };
+//       const audioContext = new AudioContext({ sampleRate: 16000 });
+//       audioContextRef.current = audioContext;
+
+//       // Load processor
+//       // await audioContext.audioWorklet.addModule("audio-processor.js");
+//       await audioContext.audioWorklet.addModule("audio-processor.js");
+//       const stream = await navigator.mediaDevices.getUserMedia({
+//         audio: true,
+//       });
+//       console.log("🎤 Microphone started");
+//       const source = audioContext.createMediaStreamSource(stream);
+//       sourceRef.current = source;
+
+//       // const workletNode = new AudioWorkletNode(
+//       //   audioContext,
+//       //   "audio-processor"
+//       // );
+//       const workletNode = new AudioWorkletNode(audioContext, "audio-processor");
+//       workletNodeRef.current = workletNode;
+
+//       // workletNode.port.onmessage = (event) => {
+//       //   const float32Array = event.data;
+//       //   if (wsRef.current.readyState === WebSocket.OPEN) {
+//       //     wsRef.current.send(float32Array.buffer);
+//       //     // wsRef.current.send(
+//       //     //   JSON.stringify({
+//       //     //     type: "audio_chunk",
+//       //     //     data: Array.from(float32Array),
+//       //     //   })
+//       //     // );
+//       //   }
+//       // };
+
+//       workletNode.port.onmessage = (event) => {
+//         const float32Array = event.data;
+//         const downsampled = downsampleBuffer(
+//           float32Array,
+//           audioContext.sampleRate,
+//           16000
+//         );
+//         if (wsRef.current?.readyState === WebSocket.OPEN) {
+//           wsRef.current.send(downsampled.buffer);
+//         }
+//       };
+
+//       // New onMessage 30/09/2025
+//       // workletNode.port.onmessage = (event) => {
+//       //   let float32Array = event.data;
+//       //   float32Array = float32Array.map((v) => Math.max(-1, Math.min(1, v)));
+//       //   const int16Array = new Int16Array(float32Array.length);
+//       //   for (let i = 0; i < float32Array.length; i++) {
+//       //     int16Array[i] = float32Array[i] * 32767;
+//       //   }
+//       //   if (wsRef.current?.readyState === WebSocket.OPEN) {
+//       //     wsRef.current.send(int16Array.buffer);
+//       //   }
+//       // };
+
+//       source.connect(workletNode);
+//       // Worklet doesn’t need to go to speakers, but it must connect to something
+//       //workletNode.connect(audioContext.destination);
+//     })();
+
+//     return () => {
+//       if (workletNodeRef.current) {
+//         workletNodeRef.current.disconnect();
+//         workletNodeRef.current = null;
+//       }
+//       if (sourceRef.current) {
+//         sourceRef.current.disconnect();
+//         sourceRef.current = null;
+//       }
+//       if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+//         audioContextRef.current.close().catch(err => console.warn("AudioContext close error:", err));
+//         audioContextRef.current = null;
+//       }
+//       if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
+//         wsRef.current.close();
+//         wsRef.current = null;
+//       }
+//     };
+//     // return () => {
+//     //   if (workletNodeRef.current) workletNodeRef.current.disconnect();
+//     //   if (sourceRef.current) sourceRef.current.disconnect();
+//     //   if (audioContextRef.current) audioContextRef.current.close();
+//     //   if (wsRef.current) wsRef.current.close();
+//     // };
+//   }, [listening, onTranscript]);
+// }
+
+// function downsampleBuffer(buffer, inputSampleRate, outputSampleRate) {
+//   if (outputSampleRate === inputSampleRate) return buffer;
+//   const sampleRateRatio = inputSampleRate / outputSampleRate;
+//   const newLength = Math.round(buffer.length / sampleRateRatio);
+//   const result = new Float32Array(newLength);
+//   let offsetResult = 0;
+//   let offsetBuffer = 0;
+
+//   while (offsetResult < result.length) {
+//     const nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
+//     let accum = 0,
+//       count = 0;
+//     for (let i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
+//       accum += buffer[i];
+//       count++;
+//     }
+//     result[offsetResult] = accum / count;
+//     offsetResult++;
+//     offsetBuffer = nextOffsetBuffer;
+//   }
+//   return result;
+// }// src/useRecognizer.js
+import { useEffect, useRef, useState } from "react";
+// import { getSocket } from "./websocket";
+
+export function useRecognizer({ listening, onTranscript }) {
+  const wsRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const workletRef = useRef(null);
+  const sourceRef = useRef(null);
+  const mountedRef = useRef(true);
+
+  const [listeningTimer, setListeningTimer] = useState(null);
+  const CHUNK_SEC = 4; // same as backend
+  // mounted flag
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const cleanup = async () => {
+      // remove worklet handler
+      if (workletRef.current) {
+        try {
+          workletRef.current.port.onmessage = null;
+        } catch {}
+        try {
+          workletRef.current.disconnect();
+        } catch {}
+        workletRef.current = null;
+      }
+
+      if (sourceRef.current) {
+        try {
+          sourceRef.current.disconnect();
+        } catch {}
+        sourceRef.current = null;
+      }
+
+      if (audioContextRef.current) {
+        try {
+          if (audioContextRef.current.state !== "closed") {
+            await audioContextRef.current.close();
+          }
+        } catch (e) {
+          console.warn("AudioContext close error:", e);
+        }
+        audioContextRef.current = null;
+      }
+
+      if (wsRef.current) {
+        try {
+          if (
+            wsRef.current.readyState === WebSocket.OPEN ||
+            wsRef.current.readyState === WebSocket.CONNECTING
+          ) {
+            wsRef.current.close();
+          }
+        } catch (e) {}
+        wsRef.current = null;
+      }
+    };
+
+    if (!listening) {
+      // quick stop if not listening
+      if (listeningTimer) {
+        clearInterval(listeningTimer);
+        setListeningTimer(null);
+      }
+      cleanup();
+      return;
+    }
+
+    (async () => {
+      try {
+        // --- WebSocket ---
+        wsRef.current = new WebSocket("ws://localhost:5000/ws");
+        wsRef.current.binaryType = "arraybuffer";
+        wsRef.current.onopen = () =>
+          console.log("🔗 WebSocket connected to ws://localhost:5000/ws");
+        // let seconds = 0;
+        // const timer = setInterval(() => {
+        //   seconds++;
+        //   console.log(`🎧 Listening... ${seconds}s`);
+        //   if (seconds >= CHUNK_SEC) {
+        //     console.log(`⏳ Sending ${CHUNK_SEC}s audio for processing`);
+        //     seconds = 0; // reset for next chunk
+        //   }
+        // }, 1000);
+        // setListeningTimer(timer);
+
+        wsRef.current.onerror = (err) => {
+          if (!mountedRef.current) return;
+        };
+        //console.error("❌ WebSocket error:", err);
+        wsRef.current.onclose = () => {
+          if (!mountedRef.current) return;
+        }; // console.log("❌ WebSocket closed");
+
+        wsRef.current.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data?.transcript) onTranscript(data.transcript);
+          } catch (e) {
+            /* server may send non-json */
+          }
+        };
+        // try {
+        //   // 🔗 get persistent WebSocket
+        //   const ws = getSocket();
+
+        //   ws.onmessage = (event) => {
+        //     try {
+        //       const data = JSON.parse(event.data);
+        //       if (data?.transcript) onTranscript(data.transcript);
+        //     } catch (e) {
+        //       /* ignore non-json server messages */
+        //     }
+        //   };
+        // --- AudioContext + Worklet ---
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioCtx({ sampleRate: 16000 });
+        audioContextRef.current = audioContext;
+
+        // resume if suspended (browser policy)
+        if (audioContext.state === "suspended") {
+          try {
+            await audioContext.resume();
+          } catch (e) {}
+        }
+
+        // load worklet. serve worklet from public/ as '/audio-processor.js'
+        await audioContext.audioWorklet.addModule("/audio-processor.js");
+        if (!mountedRef.current) {
+          await cleanup();
+          return;
+        }
+
+        // get mic
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        if (!mountedRef.current) {
+          stream.getTracks().forEach((t) => t.stop());
+          await cleanup();
+          return;
+        }
+
+        const source = audioContext.createMediaStreamSource(stream);
+        sourceRef.current = source;
+
+        // ** Record start time when mic starts **
+        // const startTime = new Date();
+        // console.log("🎙️ Mic started at:", startTime.toLocaleTimeString());
+        // if (typeof onRecordingStart === "function") onRecordingStart(startTime);
+
+        const workletNode = new AudioWorkletNode(
+          audioContext,
+          "audio-processor"
+        );
+        workletRef.current = workletNode;
+
+        workletNode.port.onmessage = (evt) => {
+          // evt.data should be a Float32Array
+          const float32 = evt.data;
+          if (!float32 || !(float32.length >= 1)) return;
+
+          // sanitize samples
+          for (let i = 0; i < float32.length; i++) {
+            let v = float32[i];
+            if (!Number.isFinite(v)) v = 0;
+            else if (v > 1) v = 1;
+            else if (v < -1) v = -1;
+            float32[i] = v;
+          }
+
+          // downsample if needed
+          const down = downsampleBuffer(
+            float32,
+            audioContext.sampleRate,
+            16000
+          );
+
+          // send only if ws open
+          if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+            try {
+              wsRef.current.send(down.buffer);
+            } catch (e) {
+              console.warn("ws send failed", e);
+            }
+          }
+        };
+
+        // connect source -> worklet (do not connect to destination to avoid echo)
+        source.connect(workletNode);
+      } catch (err) {
+        console.error("useRecognizer init error:", err);
+        await cleanup();
+      }
+    })();
+
+    return () => {
+      //stopped = true;
+      //if (listeningTimer) clearInterval(listeningTimer);
+      cleanup();
+    };
+    // return () => {
+    //   try {
+    //     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+    //       wsRef.current.close();
+    //     }
+    //   } catch (e) {
+    //     console.warn("WS cleanup error:", e);
+    //   }
+
+    //   try {
+    //     if (
+    //       audioContextRef.current &&
+    //       audioContextRef.current.state !== "closed"
+    //     ) {
+    //       audioContextRef.current.close();
+    //     }
+    //   } catch (e) {
+    //     console.warn("AudioContext cleanup error:", e);
+    //   }
+    // };
+  }, [listening, onTranscript]);
+}
+
+// simple resampler by averaging blocks
+function downsampleBuffer(buffer, inputSampleRate, outputSampleRate) {
+  if (outputSampleRate === inputSampleRate) return buffer;
+  const ratio = inputSampleRate / outputSampleRate;
+  const newLen = Math.round(buffer.length / ratio);
+  const out = new Float32Array(newLen);
+  let outIndex = 0;
+  let inIndex = 0;
+  while (outIndex < newLen) {
+    const next = Math.round((outIndex + 1) * ratio);
+    let sum = 0,
+      count = 0;
+    for (let i = inIndex; i < next && i < buffer.length; i++) {
+      sum += buffer[i];
+      count++;
+    }
+    out[outIndex] = count ? sum / count : 0;
+    outIndex++;
+    inIndex = next;
+  }
+  return out;
+}

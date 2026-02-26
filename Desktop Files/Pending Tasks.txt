@@ -1,0 +1,12 @@
+ ->linking a <label> to an <input> when their internal names don't match
+User says: “fill name John Doe”
+Voice command maps "name" to the visible <label>
+Fills the associated <input name="con_name" />
+React stores it in form.con_name
+Backend saves it as con_name (used as DB key)
+
+
+
+Lagging 
+
+Language -Uk

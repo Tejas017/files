@@ -1,0 +1,27 @@
+1. Background.js ->  starts/stops tracking and injects scripts.
+Tracks the active domain and re-injects content.js on page reload.
+Creates right‑click context menu actions when LogStatus = ON.
+Forwards context menu clicks to the content script.
+
+2.clearScripts -> Resets local storage before tracking begins:
+Clears hashMap
+Clears UserActions
+
+3. Content.js ->  Tracks clicks, input changes, double‑clicks, hover, scroll, long‑press, key shortcuts.
+Stores actions in localStorage as objects with:
+Identifier, Identifier_Value, User_Action, Data_Column, Description
+ 
+areObjectsEqual() checks last action before saving.
+
+logInteractionEvent() → routes each event type
+logAndSetUserActivity() → saves if not duplicate
+getElementIdentifier() → picks id/name/class/xpath
+
+
+4.popup.js -> Handles Start / Stop / Cancel buttons.
+When Stop is clicked:
+Requests recorded actions from content.js
+Generates Excel using xlsx + FileSaver	
+
+5.popup.html -> UI for Start/Stop/Cancel.
+Loads XLSX and FileSaver libraries.
