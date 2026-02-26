@@ -1,0 +1,12 @@
+<div style="display: block; width: 100%; padding-top: 5%; text-align: right;">
+    <a title="Phone" href="tel:17169294700" style="display: inline-block;">
+        <span style="padding-left: 12px; padding-right: 12px; font-weight: 300; font-size: 14px;">
+            <i class="fa fa-phone"></i> Sales: (716) 929-4700
+        </span>
+    </a>
+    <a id="e11" href="mailto:sales@bizmaticsinc.com" style="display: inline-block;">
+        <span style="padding-right: 12px; font-weight: 300; font-size: 14px;" id="et-info-email">
+            <i class="fa fa-envelope"></i> sales@bizmaticsinc.com
+        </span>
+    </a>
+</div>

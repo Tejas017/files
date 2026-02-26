@@ -1,0 +1,16 @@
+Portal frontend dashboard (Employee/Attorney)
+Voice-based appointment scheduling and note-taking – Typing plugin
+
+TaskList
+
+class AudioProcessor extends AudioWorkletProcessor {
+  process(inputs) {
+    const input = inputs[0];
+    if (input && input[0]) {
+      this.port.postMessage(input[0]); // send mono channel to main thread
+    }
+    return true;
+  }
+}
+
+registerProcessor("audio-processor", AudioProcessor);
