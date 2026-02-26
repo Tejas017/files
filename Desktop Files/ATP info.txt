@@ -1,0 +1,20 @@
+ James, Mary --- verify 
+James, Mary  ---- contains 
+
+
+
+// clickjs
+i want that when i click on elements like this 
+<a href="javascript:void(0);">Hide</a>  which has javascript then it should record like this in excel but for useraction it should record as "clickjs" = Data_Column: ""Description: "to change focus"Identifier: "xpath"Identifier_Value: "//*[@id=\"bubble_EMPLINFO\"]/p[1]/span[1]/a[1]"Index: ""Property: ""Screenshots: ""User_Action: "click"[[Prototype]]: Object
+content.js:146 so it will remove the shortkey for clickjs shift+clikck
+
+// Prompt 
+for example when we create a account and save the details in a website so sometimes whenever we need to fill a form at that time it get dynamicallyset that detailvalues in the form so can we track when the details gettrim and when it dynamicallyset, can we dynamicallyverify that values is it possible please explain this and please ask me question if you dont get it
+
+
+// Prompt
+ no i am not getting any errors it shows an alert window as bugfixqatesting.prognocis.biz:441 says you have unsaved changes on this page Click ok to save or cancel to go back to the page to discard changes click reset and ok and cancel button 
+
+
+// Hover Prompt
+can we change the time of hover means now its gives the proper result but i dont that every time what if we change the timing if user hover the cursor more than 10 sec then it will record the user action and also add notification
